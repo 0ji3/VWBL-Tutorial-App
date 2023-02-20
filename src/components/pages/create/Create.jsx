@@ -16,43 +16,37 @@ export const Create = () => {
   const [isChecked, setIsChecked] = useState(false);
   const { isOpen, handleOpen } = useDisclosure();
   /* VwblContainerから web3,vwbl,connectWallet を取得する */
+  const {web3, vwbl, connectWallet } = VwblContainer.useContainer();
 
   // Lesson-4
-  const mintNft = (data) => {
+  const mintNft = async (data) => {
     setIsLoading(true);
-    console.log('submitted data', data);
-    console.log('mint start...');
-    setTimeout(() => {
-      console.log('mint success!');
+    if (!web3 || !vwbl) {
+      alert('Your wallet is not connected. Please try again.');
+      setIsLoading(false);
+      await connectWallet();
+      return;
+    }
+
+    const { asset, thumbnail, title, description } = data;
+
+    try {
+      /* VWBLネットワークに対する署名を確認 */
+      if (!vwbl.signature) {
+        await vwbl.sign();
+      }
+
+      /* VWBL NFTを発行 */
+      await vwbl.managedCreateTokenForIPFS(title, description, asset[0], thumbnail[0], 0);
+      
       setIsLoading(false);
       handleOpen();
-    }, 7000);
+    } catch (error) {
+      console.error(error);
+      alert(error.message);
+      setIsLoading(false);
+    }
   };
-
-  // const mintNft = async (data) => {
-  //   setIsLoading(true);
-  //   if (!web3 || !vwbl) {
-  //     alert('Your wallet is not connected. Please try again.');
-  //     setIsLoading(false);
-  //     await connectWallet();
-  //     return;
-  //   }
-
-  //   const { asset, thumbnail, title, description } = data;
-
-  //   try {
-  //     /* VWBLネットワークに対する署名を確認 */
-
-  //     /* VWBL NFTを発行 */
-
-  //     setIsLoading(false);
-  //     handleOpen();
-  //   } catch (error) {
-  //     console.error(error);
-  //     alert(error.message);
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const {
     register,

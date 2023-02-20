@@ -10,39 +10,34 @@ import './Detail.css';
 export const Detail = () => {
   const [decryptedNft, setDecryptedNft] = useState();
   const [isViewingThumbnail, setViewingDataType] = useState(true);
-  const { userAddress } = VwblContainer.useContainer(); /* vwblを追加 */
+  const { userAddress, vwbl } = VwblContainer.useContainer(); /* vwblを追加 */
   const { isOpen, handleOpen } = useDisclosure();
   const tokenId = Number(useParams().id);
   const navigate = useNavigate();
 
   // Lesson-6
-  const fetchDecryptedNftByTokenId = (id) => {
-    setTimeout(() => {
-      const targetNft = testNfts.find((nft) => nft.id === id);
-      targetNft.decrypted_image = decryptedImageData;
-      targetNft.owner = userAddress;
-      setDecryptedNft(targetNft);
-    }, 3000);
+  const fetchDecryptedNftByTokenId = async (id) => {
+    try {
+      // vwblが存在しない場合
+      if (!vwbl) {
+        throw new Error('Now your wallet is not connected. Please connect your wallet.');
+      }
+
+      /* VWBL Networkに対する署名を確認 */
+      if (!vwbl.signature) {
+        await vwbl.sign();
+      } 
+
+      /* 復号データ、ownerアドレスを含むメタデータを取得 */
+      const decryptedNft = await vwbl.getTokenById(id);
+
+      console.log(decryptedNft);
+      setDecryptedNft(decryptedNft);
+    } catch (error) {
+      navigate('/');
+      console.error(error);
+    }
   };
-
-  // const fetchDecryptedNftByTokenId = async (id) => {
-  //   try {
-  //     // vwblが存在しない場合
-  //     if (!vwbl) {
-  //       throw new Error('Now your wallet is not connected. Please connect your wallet.');
-  //     }
-
-  //     /* VWBL Networkに対する署名を確認 */
-
-  //     /* 復号データ、ownerアドレスを含むメタデータを取得 */
-
-  //     console.log(decryptedNft);
-  //     setDecryptedNft(decryptedNft);
-  //   } catch (error) {
-  //     navigate('/');
-  //     console.error(error);
-  //   }
-  // };
 
   const handleViewData = () => {
     setViewingDataType((prev) => !prev);
@@ -67,7 +62,7 @@ export const Detail = () => {
         <FileViewer url={decryptedNft.image} alt="NFT" height={'100%'} width={'100%'} />
       ) : (
         // Lesson-6
-        <FileViewer url={decryptedNft.decrypted_image} alt="NFT" height={'100%'} width={'100%'} />
+        <FileViewer url={decryptedNft.ownDataBase64[0]} alt="NFT" height={'100%'} width={'100%'} />
       )}
       <div className="Detail-Container">
         <div className="Data-Wrapper">

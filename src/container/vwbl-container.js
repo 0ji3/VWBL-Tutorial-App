@@ -6,7 +6,7 @@ import { ManageKeyType, UploadContentType, UploadMetadataType, VWBL } from 'vwbl
 const useVWBL = () => {
   const [userAddress, setUserAddress] = useState('');
   const [web3, setWeb3] = useState();
-  /* useVWBLの持つ変数にvwblインスタンスを追加 */
+  const [vwbl, setVwbl] = useState();
 
   const connectWallet = async () => {
     try {
@@ -37,7 +37,7 @@ const useVWBL = () => {
       }
 
       /* vwblインスタンス作成してstateを保存する処理 */
-      // initVwbl(web3);
+      initVwbl(web3);
     } catch (error) {
       if (error.code === 4001) {
         alert('Please connect Your Wallet.');
@@ -51,29 +51,29 @@ const useVWBL = () => {
   const disconnectWallet = () => {
     setUserAddress('');
     setWeb3(undefined);
-    // setVwbl(undefined);
+    setVwbl(undefined);
   };
 
   // Lesson-3
   const initVwbl = (web3) => {
     // // vwblインスタンスの作成
-    // const vwblInstance = new VWBL({
-    //   web3,
-    //   contractAddress: process.env.REACT_APP_NFT_CONTRACT_ADDRESS,
-    //   vwblNetworkUrl: process.env.REACT_APP_VWBL_NETWORK_URL,
-    //   manageKeyType: ManageKeyType.VWBL_NETWORK_SERVER,
-    //   uploadContentType: UploadContentType.IPFS,
-    //   uploadMetadataType: UploadMetadataType.IPFS,
-    //   ipfsNftStorageKey: process.env.REACT_APP_NFT_STORAGE_KEY,
-    // });
-    // // vwblインスタンスをstateを保存
-    // setVwbl(vwblInstance);
+    const vwblInstance = new VWBL({
+      web3,
+      contractAddress: process.env.REACT_APP_NFT_CONTRACT_ADDRESS,
+      vwblNetworkUrl: process.env.REACT_APP_VWBL_NETWORK_URL,
+      manageKeyType: ManageKeyType.VWBL_NETWORK_SERVER,
+      uploadContentType: UploadContentType.IPFS,
+      uploadMetadataType: UploadMetadataType.IPFS,
+      ipfsNftStorageKey: process.env.REACT_APP_NFT_STORAGE_KEY,
+    });
+    // vwblインスタンスをstateを保存
+    setVwbl(vwblInstance);
   };
 
   return {
     userAddress,
     web3,
-    // vwbl,
+    vwbl,
     connectWallet,
     disconnectWallet,
     initVwbl,

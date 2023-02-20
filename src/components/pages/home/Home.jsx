@@ -12,56 +12,51 @@ export const Home = () => {
   const [tabIndex, setTabIndex] = useState(0);
   const [mintedNfts, setMintedNfts] = useState();
   const [ownedNfts, setOwnedNfts] = useState();
-  const { userAddress, connectWallet, disconnectWallet } = VwblContainer.useContainer(); /* web3, vwblを追加 */
-
-  // Lesson-5
-  const fetchNfts = () => {
-    setTimeout(() => {
-      setMintedNfts(testNfts.slice(0, 2));
-      setOwnedNfts(testNfts);
-    }, 2000);
-  };
+  const { userAddress, web3, vwbl, connectWallet, disconnectWallet } = VwblContainer.useContainer();
 
   // Lesson-5
   useEffect(() => {
     fetchNfts();
-  }, [userAddress]); /* userAddressからvwblに変更 */
+  }, [vwbl]);
 
-  // const fetchNfts = async () => {
-  //   if (!userAddress || !web3 || !vwbl) {
-  //     console.log('Now your wallet is not connected. Please connect your wallet.');
-  //     return;
-  //   }
+  const fetchNfts = async () => {
+    if (!userAddress || !web3 || !vwbl) {
+      console.log('Now your wallet is not connected. Please connect your wallet.');
+      return;
+    }
 
-  //   try {
-  //     /* ミントしたNFTのtokenIdの配列を取得（mintedTokenIds） */
+    try {
+      /* ミントしたNFTのtokenIdの配列を取得（mintedTokenIds） */
+      const mintedTokenIds = await vwbl.getTokenByMinter(userAddress);
 
-  //     if (mintedTokenIds.length) {
-  //       const mintedNfts = [];
-  //       for (const tokenId of mintedTokenIds) {
-  //         /* tokenIdからNFTメタデータを取得（metadata） */
+      if (mintedTokenIds.length) {
+        const mintedNfts = [];
+        for (const tokenId of mintedTokenIds) {
+          /* tokenIdからNFTメタデータを取得（metadata） */
+          const metadata = await vwbl.getMetadata(tokenId);
 
-  //         if (metadata) mintedNfts.push(metadata);
-  //       }
-  //       setMintedNfts(mintedNfts.reverse());
-  //     }
+          if (metadata) mintedNfts.push(metadata);
+        }
+        setMintedNfts(mintedNfts.reverse());
+      }
 
-  //     /* 所有しているNFTのtokenIdの配列を取得（ownedTokenIds） */
+      /* 所有しているNFTのtokenIdの配列を取得（ownedTokenIds） */
+      const ownedTokenIds = await vwbl.getOwnTokenIds();
 
-  //     if (ownedTokenIds.length) {
-  //       const owendNfts = [];
-  //       for (const tokenId of ownedTokenIds) {
-  //         /* tokenIdからNFTメタデータを取得（metadata） */
+      if (ownedTokenIds.length) {
+        const owendNfts = [];
+        for (const tokenId of ownedTokenIds) {
+          /* tokenIdからNFTメタデータを取得（metadata） */
+          const metadata = await vwbl.getMetadata(tokenId);
+          if (metadata) owendNfts.push(metadata);
+        }
 
-  //         if (metadata) owendNfts.push(metadata);
-  //       }
-
-  //       setOwnedNfts(owendNfts.reverse());
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
+        setOwnedNfts(owendNfts.reverse());
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <div className="Home-Container">

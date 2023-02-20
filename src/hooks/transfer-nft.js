@@ -8,41 +8,33 @@ export const useTransferNft = () => {
   const tokenId = Number(useParams().id);
   const navigate = useNavigate();
   /*  VwblContainerからvwblインスタンスを取得する */
-
+  const {vwbl} = VwblContainer.useContainer();
   // Lesson-7
-  const transferNft = (data) => {
-    console.log('submitted data', data);
+  const transferNft = async (data) => {
+    if (!vwbl) {
+      console.log('Now your wallet is not connected. Please connect your wallet.');
+      return;
+    }
+
+    const { address } = data;
     setIsLoading(true);
-    setTimeout(() => {
+
+    try {
+      /* VWBL NFTを送信 */
+      await vwbl.safeTransfer(address, tokenId);
+
       setIsLoading(false);
       setIsComplete(true);
-    }, 4000);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+    }
   };
-
-  // const transferNft = async (data) => {
-  //   if (!vwbl) {
-  //     console.log('Now your wallet is not connected. Please connect your wallet.');
-  //     return;
-  //   }
-
-  //   const { address } = data;
-  //   setIsLoading(true);
-
-  //   try {
-  //     /* VWBL NFTを送信 */
-
-  //     setIsLoading(false);
-  //     setIsComplete(true);
-  //   } catch (error) {
-  //     console.error(error);
-  //     setIsLoading(false);
-  //   }
-  // };
 
   // Lesson-7
   const handleComplete = () => {
     setIsComplete((prev) => !prev);
-    // navigate('/');
+    navigate('/');
   };
 
   return {
